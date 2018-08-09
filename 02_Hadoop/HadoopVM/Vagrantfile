@@ -1,0 +1,28 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/xenial64"
+
+  # Forward ports
+  # HDFS Namenode Web UI
+  config.vm.network "forwarded_port", guest: 50070, host: 50070, host_ip: "127.0.0.1", auto_correct: true
+  # YARN Resource Manager Web UI
+  config.vm.network "forwarded_port", guest: 8088, host: 8088, host_ip: "127.0.0.1", auto_correct: true
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus = 2
+    vb.memory = 4096
+  end
+
+  # config.vm.synced_folder "./", "/vagrant",
+  #   :owner => "vagrant",
+  #   :group => "vagrant",
+  #   mount_options: ["dmode=700,fmode=700"]
+
+  config.vm.provision "shell", privileged:true, path: "setupadmin.sh"
+  config.vm.provision "shell", privileged:false, path: "setuphadoop.sh"
+  config.vm.provision "shell", privileged:false, path: "startdaemons.sh", run: "always"
+  config.vm.provision "shell", privileged:false, path: "confighdfsdirs.sh"
+end
